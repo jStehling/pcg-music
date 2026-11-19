@@ -1,4 +1,6 @@
 # This is a sample Python script.
+import random
+
 from midiutil import MIDIFile
 # Press Shift+F10 to execute it or replace it with your code.
 # Press Double Shift to search everywhere for classes, files, tool windows, actions, and settings.
@@ -6,39 +8,35 @@ from midi_player import MIDIPlayer
 from midi_player.stylers import basic, cifka_advanced
 
 from midiutil import MIDIFile
-
+import makeRythm as mr
 # 4 tracks: piano, bass, flute, drums
-midi = MIDIFile(2)
+MF = MIDIFile(1)
 
-tempo = 600
-for track in range(4):
-   midi.addTempo(track, 0, tempo)
+TRACK = 0
+CHANNEL = 0
+TIME = 0
+DURATION = 1
 
-# --- Track 0: Piano (channel 0) ---
-midi.addTrackName(1, 0, "electric guitar")
-midi.addProgramChange(1, 0, 0, 93)       # track, channel, time, program (0 = Acoustic Grand Piano)
+VOLUME = 100
+TEMPO = 100
 
-midi.addNote(1, 0, 50, 1, 4, 100)
+Scales = {"C_MAJOR": [60,62,64,65,67,69,71,72],
+          "C_MINOR": [60,62,63,65,67,68,70,72],
+          "F_MINOR": [65,67,68,70,72,73,75,77],
+          "B_MAJOR": [70,73,75,76,78,80,82]
+          }
 
-"""
-# --- Track 2: Flute (channel 2) ---
-midi.addTrackName(2, 0, "Flute")
-midi.addProgramChange(2, 2, 0, 118)      # synth voice
-midi.addNote(2, 2, 76, 0, 2, 80)
-midi.addNote(2, 2, 79, 2, 2, 80)
+NOTES = [30,32,34]
 
-"""
+MF.addTempo(TRACK, TIME, TEMPO)
 
-midi.addTrackName(0, 0, "Drums")
-midi.addNote(0, 9, 38, 1, 0.5, 100)                 # snare on beat 2
-midi.addNote(0, 9, 38, 3, 0.5, 100)                 # snare on beat 4
-for beat in range(8):
-    midi.addNote(0, 9, 35, beat, 0.5, 100)          # kick
-    #midi.addNote(0, 9, 35, beat + 0.5, 0.5, 70)     # closed hi-hat
+rythm_list = mr.makeR_rythm(beat=4, max_bars=4)
 
+for bar in rythm_list:
+    for note in bar:
+        MF.addNote(TRACK, CHANNEL, random.choice(NOTES), TIME, note, VOLUME)
+        TIME += note
 
+with open("midiTest.mid", "wb") as f:
+    MF.writeFile(f)
 
-
-with open("multi_instrument.mid", "wb") as f:
-    midi.writeFile(f)
-MIDIPlayer("major-scale.mid",400)
