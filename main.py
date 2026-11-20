@@ -11,7 +11,7 @@ from midi_player.stylers import basic, cifka_advanced
 from midiutil import MIDIFile
 from numpy.ma.core import choose
 
-import makeRythmTrack as mr
+import makeRythm as mr
 import matplotlib.pyplot as plt
 import numpy as np
 # 4 tracks: piano, bass, flute, drums

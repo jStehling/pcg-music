@@ -36,6 +36,9 @@ def make_rythm(beat = 4, max_bars = 0):
                 else:
                     doubletriplet = False
                 beat -=1
+            if choice == 5 or choice == 6:
+                barlist.append(1)
+                beat -=1
         rythmlist.append(barlist)
         beat = 4
     return rythmlist
