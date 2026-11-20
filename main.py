@@ -11,7 +11,7 @@ from midi_player.stylers import basic, cifka_advanced
 from midiutil import MIDIFile
 from numpy.ma.core import choose
 
-import makeRythmTrack as mr
+import makeRythm as mr
 import matplotlib.pyplot as plt
 import numpy as np
 # 4 tracks: piano, bass, flute, drums
@@ -34,7 +34,7 @@ def make_markov(notes):
     #add to sum
     for i in  range(length):
         for j in range(length):
-            t_matrix[i][j] = random.randint(0,100)
+            t_matrix[i][j] = random.randint(0,1000)
             sums[i] += t_matrix[i][j]
 
     #
@@ -84,50 +84,79 @@ def choose_note(note, t_matrix, notes):
 def findNote(note = -1, scale = [-1]):
     if note == -1 or scale[0] == -1:
         return -1
-    for i in range(8):
+    for i in range(len(scale)):
         if scale[i] == note:
             return i;
     return -1
 
 def make_midi(cycle=1):
-    MF = MIDIFile(2)
+    MF = MIDIFile(4)
     RYTHM_TRACK = 0
     STRINGS_TRACK = 1
-    CHANNEL = 0
+    VOICES_TRACK = 2
+
 
     RYTHM_VOLUME = 100
 
     #is beats per minute /60 to get beats per bar
     TEMPO = 120
     TIME = 0
+    RHYTHM_TIME = 0
+    STRING_TIME = 0
+    DRUM_TIME = 0
+    #instruments that sound cool: 80, 83, 85, 86,  38, 39,
+    MF.addProgramChange(RYTHM_TRACK, 0,TIME, 39)#synth bass 1 = 38 synthbass 2 = 39
 
-    MF.addProgramChange(RYTHM_TRACK, CHANNEL,TIME, 33)#electric bass finger
-    MF.addProgramChange(STRINGS_TRACK, CHANNEL, TIME, 91)#electric guitar clean
+    #instruments that sound cool: 84, 83
+    MF.addProgramChange(STRINGS_TRACK, 1, TIME, 86)
+
+    #55
+    MF.addProgramChange(VOICES_TRACK, 2, TIME, 63)
 
     MF.addTempo(RYTHM_TRACK, TIME, TEMPO)
-    #MF.addTempo(STRINGS_TRACK, TIME, TEMPO)
 
-    rhythm_list = mr.make_rythm(beat=4, max_bars=2)
+
+    rhythm_list = mr.make_rythm(beat=8, max_bars=2)
+    string_list = mr.make_rythm(beat=8, max_bars=2)
+    drum_list = mr.make_rythm(beat=8, max_bars=2)
+
+    rhythm_t_matrix = make_markov(PITCHES)
+    ooh_t_matrix = make_markov(PITCHES)
 
 
     for bar in rhythm_list:
         #initial bass pitch for bar
         next_rhythm_note = random.choice(PITCHES)
-        rhythm_t_matrix = make_markov(PITCHES)
-
-        next_guitar_note = random.choice(PITCHES)
-        guitar_t_matrix = make_markov(PITCHES)
+        next_ooh_note = random.choice(PITCHES)
 
         for step in bar:
             #choose base note
-            #next_rhythm_note = choose_note(next_rhythm_note, rhythm_t_matrix, PITCHES)
-            #MF.addNote(RYTHM_TRACK, CHANNEL, next_rhythm_note - 32, TIME, step, RYTHM_VOLUME)
+            next_rhythm_note = choose_note(next_rhythm_note, rhythm_t_matrix, PITCHES)
+            MF.addNote(RYTHM_TRACK, 0, next_rhythm_note-30, TIME, step, 80)
 
-            #choose guitar note
-            next_guitar_note = choose_note(next_guitar_note, rhythm_t_matrix, PITCHES)
-            MF.addNote(STRINGS_TRACK, CHANNEL, next_guitar_note-30, TIME, step, RYTHM_VOLUME)
+            next_ooh_note = choose_note(next_ooh_note, ooh_t_matrix, PITCHES)
+            #MF.addNote(VOICES_TRACK, 2, next_ooh_note, TIME, step, 100)
 
             TIME += step
+    #print(TIME)
+
+    guitar_t_matrix = make_markov(PITCHES)
+    for bar in string_list:
+        next_guitar_note = random.choice(PITCHES)
+        for step in bar:
+            next_guitar_note = choose_note(next_guitar_note, guitar_t_matrix, PITCHES)
+            MF.addNote(STRINGS_TRACK, 1, next_guitar_note, STRING_TIME, step, 100)
+            STRING_TIME += step
+
+    #print(STRING_TIME)
+    for bar in drum_list:
+        for step in bar:
+            #neat drums: 35, 3
+            MF.addNote(3, 9, 36, DRUM_TIME, step, 100)
+            #if (random.random() * 100 < 10):
+                #MF.addNote(3,9,49, DRUM_TIME, .25, 60)
+            DRUM_TIME += step
+    #print(DRUM_TIME)
 
     with open("midiTest.mid", "wb") as f:
         MF.writeFile(f)
