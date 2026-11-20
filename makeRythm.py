@@ -1,7 +1,7 @@
 import random
 
 #4 quarter bear
-def makeR_rythm(beat = 4, max_bars = 0):
+def make_rythm(beat = 4, max_bars = 0):
     rythmlist =[]
     barlist = []
     doubletriplet = False
