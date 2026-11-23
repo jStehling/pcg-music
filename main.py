@@ -5,16 +5,13 @@ import random
 from midiutil import MIDIFile
 # Press Shift+F10 to execute it or replace it with your code.
 # Press Double Shift to search everywhere for classes, files, tool windows, actions, and settings.
-from midi_player import MIDIPlayer
-from midi_player.stylers import basic, cifka_advanced
-
 from midiutil import MIDIFile
-from numpy.ma.core import choose
+
 import MakeMarkov as MK
 import MakeStringRhythm as msr
 import makeRythm as mr
-import matplotlib.pyplot as plt
-import numpy as np
+
+
 # 4 tracks: piano, bass, flute, drums
 
 
@@ -116,7 +113,7 @@ def make_midi(cycle=1):
             MF.addNote(DRUMS_TRACK, 9, 36, DRUM_TIME, beat, 100)
             DRUM_TIME += beat
 
-    with open("midiTest.mid", "wb") as f:
+    with open("PCG track.mid", "wb") as f:
         MF.writeFile(f)
 
 make_midi()
